@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="suryaprabhaz">
+    <title>Live AI Age Estimation</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load face-api.js from local file or CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script defer src="script.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Floating Header -->
+        <header class="glass-header">
+            <h1>Live AI Age Estimation</h1>
+            <p>Face Detection & Age Prediction</p>
+        </header>
+
+        <!-- Video & Canvas Container -->
+        <div class="video-container">
+            <video id="video" autoplay muted playsinline></video>
+            <!-- Canvas will be overlayed by script -->
+        </div>
+
+        <!-- Disclaimer Footer -->
+        <footer class="glass-footer">
+            <p>Developed by <a href="https://github.com/suryaprabhaz" target="_blank"
+                    style="color: var(--box-color); text-decoration: none;">@suryaprabhaz</a> | ⚠️ AI Estimation</p>
+        </footer>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Loading AI Models...</p>
+        </div>
+    </div>
+</body>
+
+</html>
