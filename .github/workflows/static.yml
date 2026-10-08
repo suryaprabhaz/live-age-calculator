@@ -1,0 +1,15 @@
+name: Live Age Estimation Quality
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: test -s index.html && test -s script.js && test -s style.css
+      - run: node --check script.js
