@@ -8,6 +8,8 @@ const loading = document.getElementById('loading');
 
 // Load models from local ./models directory
 const MODEL_URL = './models';
+let detectionTimer = null;
+let activeStream = null;
 
 Promise.all([
     faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL), // Higher accuracy than TinyFace
@@ -140,6 +142,7 @@ function startVideo() {
 
     navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
+            activeStream = stream;
             video.srcObject = stream;
             if (loading) loading.classList.add('hidden');
         })
@@ -147,6 +150,7 @@ function startVideo() {
             console.warn("HD Video failed, falling back to default.", err);
             navigator.mediaDevices.getUserMedia({ video: {} })
                 .then(stream => {
+                    activeStream = stream;
                     video.srcObject = stream;
                     if (loading) loading.classList.add('hidden');
                 })
@@ -161,12 +165,19 @@ video.addEventListener('play', () => {
     const displaySize = { width: video.clientWidth, height: video.clientHeight };
     faceapi.matchDimensions(canvas, displaySize);
 
-    setInterval(async () => {
+    if (detectionTimer) clearInterval(detectionTimer);
+    detectionTimer = setInterval(async () => {
         // High confidence threshold to avoid false positives (ghost faces)
         // With smoothing, we can afford to miss a frame or two if confidence is low
-        const detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+        let detections;
+        try {
+            detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
             .withFaceLandmarks()
             .withAgeAndGender();
+        } catch (error) {
+            console.warn('Face detection cycle failed:', error);
+            return;
+        }
 
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
 
@@ -216,4 +227,10 @@ video.addEventListener('play', () => {
         });
 
     }, 100); // 100ms = 10 FPS (Balance between CPU usage and smoothness)
+});
+
+
+window.addEventListener('beforeunload', () => {
+    if (detectionTimer) clearInterval(detectionTimer);
+    if (activeStream) activeStream.getTracks().forEach(track => track.stop());
 });
